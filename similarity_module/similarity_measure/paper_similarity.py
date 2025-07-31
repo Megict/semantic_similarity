@@ -45,12 +45,13 @@ def calculate_text_similarities(lhs_text : list, rhs_text : list,
                                 compare_sentences = True, # сравнивать сегменты, или предложения по-отдельности
                                 selection_method = 'max', # только при compare_sentences, как обрабатывать полученную матрицу (max, mean, nmax)
                                 comparation_method = be_text_sim_func,
+                                available_tags = available_tags : list
                                ):
     if isinstance(selection_method, int):
         selection_n = cp(selection_method)
         selection_method = 'nmax'
     tags_sims = {tag : None for tag in available_tags}
-    for tag in available_tags[:-1]: # не сравниваем по none
+    for tag in available_tags: # не сравниваем по none
         lhs_text_fragment = lhs_text[tag] if tag in lhs_text else None
         rhs_text_fragment = rhs_text[tag] if tag in rhs_text else None
         if lhs_text_fragment is None or rhs_text_fragment is None:
