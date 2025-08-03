@@ -40,7 +40,7 @@ class text_segment_classifier():
 
     def predict(self, sentence : str):
         with torch.no_grad():
-            inp = self.pipeline.tokenizer(sentence, return_tensors = "pt")
+            inp = self.pipeline.tokenizer(sentence, truncation=True, return_tensors = "pt")
             inp = inp.to(device)
             outputs = self.pipeline.model(**inp)
         res = outputs.logits[0][0]
@@ -53,7 +53,7 @@ class text_segment_classifier():
         it = tqdm(sentences) if verbal else sentences
         for sentence in it:
             with torch.no_grad():
-                inp = self.pipeline.tokenizer(sentence, return_tensors = "pt")
+                inp = self.pipeline.tokenizer(sentence, truncation=True, return_tensors = "pt")
                 inp = inp.to(device)
                 outputs = self.pipeline.model(**inp)
             res = outputs.logits[0][0]

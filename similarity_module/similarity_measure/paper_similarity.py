@@ -45,7 +45,7 @@ def calculate_text_similarities(lhs_text : list, rhs_text : list,
                                 compare_sentences = True, # сравнивать сегменты, или предложения по-отдельности
                                 selection_method = 'max', # только при compare_sentences, как обрабатывать полученную матрицу (max, mean, nmax)
                                 comparation_method = be_text_sim_func,
-                                available_tags = available_tags : list
+                                available_tags = available_tags
                                ):
     if isinstance(selection_method, int):
         selection_n = cp(selection_method)

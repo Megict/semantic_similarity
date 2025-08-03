@@ -19,16 +19,16 @@ def simple_segmentation_sentences(split_text : list):
 def simple_segmentation_single(split_text : list):
     return '. '.join(split_text)
 
-
-with open('stopwords.pkl', 'rb') as f:
+#---- text tiling ----
+with open('experimental/stopwords.pkl', 'rb') as f:
     stopwords = pickle.load(f)
 
 from nltk.tokenize.texttiling import TextTilingTokenizer
 tt = TextTilingTokenizer(demo_mode=True, stopwords= stopwords, smoothing_width = 10)
 
-def segment_with_tt(text): # text - список предложений
+def text_tiling_segmentation(text, n_text): # text - список предложений
+    n_text = ' \n\n\n\t '.join(n_text)
     text = ' \n\n\n\t '.join(text)
-    n_text = lemmatize_text(text)
 
     gaps = tt._smooth_scores(tt._block_comparison(tt._divide_to_tokensequences(n_text), tt._create_token_table(tt._divide_to_tokensequences(n_text), tt._mark_paragraph_breaks(n_text))))
 
@@ -58,25 +58,16 @@ def segment_with_tt(text): # text - список предложений
         segmented_text[segment_pos] = segmented_text[segment_pos].replace(' \n\n\n\t ', ' . ').strip()
     return segmented_text        
 
-def segment_texts(texts, segmentation_method = segment_with_tt, segmentation_method_params = {}, verbouse = True):
-    # на вход идет список с текстами, на выход – слоарь сегментов и словарь текстов (с сегментами)
-    segmented_texts = {}
-    all_segments_separated = {}
-    seg_ind = 0
-    if verbouse:
-        it = tqdm(range(len(texts)))
-    else:
-        it = range(len(texts))
-    for i in it:
-        clean_text, norm_text, text_ind = texts[i]['clean_text'], texts[i]['tokenized_text'], texts[i]['id']
-        try:# сегментированный текст по идее тоже надо инвертировать к ненормализованному формату
-            segmented_text_norm = segmentation_method(norm_text, **segmentation_method_params)# нужно еще добавить полный текст без сегментов и нормализации
-            segmented_texts[text_ind] = segmented_text_norm
-            
-            for i in range(len(segmented_text_norm)):
-                all_segments_separated[seg_ind] = [text_ind, segmented_text_norm[i]] # записываем, к какому тексту относится сегмент.
-                seg_ind += 1
-        except ValueError:
-            segmented_texts[text_ind] = [[''],['']]
-            pass
-    return segmented_texts
+from experimental.graph_segmentation.main import PartitionSolver
+ps = PartitionSolver('experimental/graph_segmentation/data/adjacency_table.npy', 'experimental/graph_segmentation/data/table.pkl')
+
+def segment_with_graphs(text, normalized_text):
+    seg_str, gaps, threshold = ps.solve_partition(normalized_text)
+    segmented_text = ['']
+    for i in range(len(text)):
+        segmented_text[-1] += text[i] + ' . '
+        if seg_str[i] == '1':
+            segmented_text.append('')
+    if segmented_text[-1] == '':
+        segmented_text = segmented_text[:-1]
+    return segmented_text
