@@ -64,6 +64,7 @@ class text_segment_classifier():
     
     def mass_predict_alter(self, sentences : list, n_samples = 5, verbal : bool = False):
         preds = ['None' for _ in sentences]
+        text_dict = {it : [] for it in self.pipeline.model.config.id2label.values()}
         all_scores = []
         it = tqdm(sentences) if verbal else sentences
         for sentence in it:
@@ -78,5 +79,5 @@ class text_segment_classifier():
         all_scores = np.array(all_scores)
         for class_ in list(self.pipeline.model.config.id2label.keys()):
             for ind in all_scores[:,class_].argsort()[-n_samples:][::-1]:
-                preds[ind] = self.pipeline.model.config.id2label[class_]
-        return preds
+                text_dict[self.pipeline.model.config.id2label[class_]].append(sentences[ind])
+        return text_dict
