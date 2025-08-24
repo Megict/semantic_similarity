@@ -62,7 +62,7 @@ class text_segment_classifier():
             preds.append(pred_calss)
         return preds
     
-    def mass_predict_alter(self, sentences : list, n_samples = 5, verbal : bool = False):
+    def mass_predict_alter(self, sentences : list, n_samples = 5, verbal : bool = False, unique = False):
         preds = ['None' for _ in sentences]
         text_dict = {it : [] for it in self.pipeline.model.config.id2label.values()}
         all_scores = []
@@ -76,8 +76,22 @@ class text_segment_classifier():
             # print(scores)
             all_scores.append(scores)
             # pred = int(torch.argmax(res))
-        all_scores = np.array(all_scores)
-        for class_ in list(self.pipeline.model.config.id2label.keys()):
-            for ind in all_scores[:,class_].argsort()[-n_samples:][::-1]:
-                text_dict[self.pipeline.model.config.id2label[class_]].append(sentences[ind])
+        if unique: 
+            already_in = set()
+            all_scores = np.array(all_scores)
+            for class_ in list(self.pipeline.model.config.id2label.keys()):
+                for ind in all_scores[:,class_].argsort()[::-1]:
+                    if sentences[ind] not in already_in:
+                        already_in.add(sentences[ind])
+                        text_dict[self.pipeline.model.config.id2label[class_]].append(sentences[ind])
+                        if len(text_dict[self.pipeline.model.config.id2label[class_]]) >= n_samples:
+                            break
+                if text_dict[self.pipeline.model.config.id2label[class_]] < n_samples: # если сегменты закончились
+                    break
+        else:
+            all_scores = np.array(all_scores)
+            for class_ in list(self.pipeline.model.config.id2label.keys()):
+                for ind in all_scores[:,class_].argsort()[-n_samples:][::-1]:
+                    text_dict[self.pipeline.model.config.id2label[class_]].append(sentences[ind])
+
         return text_dict
