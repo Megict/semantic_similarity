@@ -21,10 +21,13 @@ class text_segment_classifier():
         model.config.id2label = NumToLab
         model.config.label2id = LabtoNum
         model.classifier = torch.nn.Sequential(
-            torch.nn.Linear(312,149),
+            torch.nn.Linear(312,200),
             torch.nn.Tanh(),
-            torch.nn.Dropout(p=0.1, inplace=False),
-            torch.nn.Linear(149,5),
+            torch.nn.Dropout(p=0.2, inplace=False),
+            torch.nn.Linear(200,100),
+            torch.nn.Tanh(),
+            torch.nn.Dropout(p=0.2, inplace=False),
+            torch.nn.Linear(100,6),
             torch.nn.Softmax(dim = -1)
         )
         print("loading new weights...")
